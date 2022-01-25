@@ -1,3 +1,4 @@
+import os.path
 from tkinter import *
 from tkinter.messagebox import showinfo, showwarning
 from tkinter.ttk import Combobox
@@ -49,12 +50,12 @@ class app :
         self.f1.place(x=30, y=130, height=150, width=600)
         self.f2 = LabelFrame(win, text='Spliting A File')
         self.f2.pack(fill=BOTH, expand=1)
-        self.f2.place(x=350, y=350, height=150, width=250)
+        self.f2.place(x=350, y=350, height=150, width=260)
         self.lbl7 = Label(self.f2, text='Split Percentage(%) :')
         self.lbl7.place(relx=0.05,rely=0.1)
         cn1=self.cb2 = Combobox(self.f2, width=10, state="readonly")
-        self.cb2.place(relx=0.6,rely=0.1)
-        cn1['values'] = (50,25)
+        self.cb2.place(relx=0.5,rely=0.1)
+        cn1['values'] = (100,50,25)
         self.b2 = Button(self.f2, text='Result',command=self.download)
         self.b2.place(relx=0.4, rely=0.4)
 
@@ -68,7 +69,7 @@ class app :
             self.t4.delete(0, END)
             self.t4.insert(END, str(sum))
         else:
-            showwarning(title='Error message', message="Upload a file first!")
+            showwarning(title='Warning', message="Upload a file first!")
 
     def aggregate2(self):
         temp = self.t1.get()
@@ -78,7 +79,7 @@ class app :
             self.t4.delete(0,END)
             self.t4.insert(END, str(min))
         else:
-            showwarning(title='Error message', message="Upload a file first!")
+            showwarning(title='Warning', message="Upload a file first!")
 
     def aggregate3(self):
         temp = self.t1.get()
@@ -89,7 +90,7 @@ class app :
             self.t4.insert(END, str(max))
 
         else:
-            showwarning(title='Error message', message="Upload a file first!")
+            showwarning(title='Warning', message="Upload a file first!")
 
     def aggregate4(self):
         temp = self.t1.get()
@@ -100,7 +101,7 @@ class app :
             self.t4.insert(END, str(null))
 
         else:
-            showwarning(title='Error message', message="Upload a file first!")
+            showwarning(title='Warning', message="Upload a file first!")
 
     def aggregate5(self):
         temp = self.t1.get()
@@ -110,7 +111,7 @@ class app :
             self.t4.delete(0, END)
             self.t4.insert(END, str(nnull))
         else:
-            showwarning(title='Error message', message="Upload a file first!")
+            showwarning(title='Warning', message="Upload a file first!")
 
     def aggregate6(self):
         temp = self.t1.get()
@@ -120,36 +121,48 @@ class app :
             self.t4.delete(0, END)
             self.t4.insert(END, str(count))
         else:
-            showwarning(title='Error message', message="Upload a file first!")
+            showwarning(title='Warning', message="Upload a file first!")
 
 
     def browse(self):
         global filename, headers,rowcount
         filename = filedialog.askopenfilename(initialdir = "/",title = "Select a File",filetypes = (("csv files","*.csv*"),("all files","*.*")))
-        showinfo(title='Select a File', message="File Uploaded !")
-        self.t1.delete(0,END)
-        self.t1.insert(END, 'File Choosed')
-        #print(self.t1.get())
-        df = pd.read_csv(filename)
-        rowcount = len(df.axes[0])
-        colcount = len(df.axes[1])
-        self.t2.delete(0, END)
-        self.t2.insert(END, str(rowcount))
-        self.t3.delete(0, END)
-        self.t3.insert(END, str(colcount))
+        if filename == '':
+            showwarning(title='Warning', message='Select a File first')
 
-        df1 = pd.read_csv(filename)
-        self.table = Table(self.f1, dataframe=df1, read_only=True)
-        self.table.show()
+        else:
+            showinfo(title='Information', message="File Uploaded !")
+            self.t1.delete(0, END)
+            self.t1.insert(END, 'File Choosed')
+            df = pd.read_csv(filename)
+            rowcount = len(df.axes[0])
+            colcount = len(df.axes[1])
+            self.t2.delete(0, END)
+            self.t2.insert(END, str(rowcount))
+            self.t3.delete(0, END)
+            self.t3.insert(END, str(colcount))
 
-        cn = self.cb1 = Combobox(win, width=15,state="readonly")
-        self.cb1.place(x=150, y=300)
-        with open(filename,'r') as f:
-            d_reader = csv.DictReader(f)
-            headers = d_reader.fieldnames
-        cn['values'] = headers
+            filesize = os.path.getsize(filename)
+            size = int(filesize / 1024)
+            self.lbl8 = Label(win,text='FILE SIZE :')
+            self.lbl8.place(x=350,y=50)
+            self.lbl9 = Label(win, text=f'{size}KB')
+            self.lbl9.place(x=400, y=50)
+
+            df1 = pd.read_csv(filename)
+            self.table = Table(self.f1, dataframe=df1, read_only=True)
+            self.table.show()
+
+            cn = self.cb1 = Combobox(win, width=15, state="readonly")
+            self.cb1.place(x=150, y=300)
+            with open(filename, 'r') as f:
+                d_reader = csv.DictReader(f)
+                headers = d_reader.fieldnames
+            cn['values'] = headers
+
 
     def download(self):
+
         input_percent = self.cb2.get()
         data = pd.read_csv(filename)
         size = int(float(rowcount) * float(float(input_percent) / 100))
@@ -157,7 +170,7 @@ class app :
         for i in range(n):
             df = data[size * i:size * (i + 1)]
             df.to_csv(f'SplitFile_{i + 1}.csv', index=False)
-        showinfo(title='Splited', message="File Splited Succuessfully !")
+        showinfo(title='Information', message="File Splited Succuessfully !")
         self.msg = Label(self.f2,text="File Splited Succuessfully..!")
         self.msg.place(relx=0.2, rely=0.7)
 
