@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, showwarning
 from tkinter.ttk import Combobox
 from tkinter import filedialog
 import pandas as pd
@@ -28,22 +28,35 @@ class app :
         self.lbl5 = Label(win, text='AGGREATION FUNCTION :')
         self.lbl5.place(x=50, y=350)
         v = IntVar()
-        self.r1 =Radiobutton(win,text="SUM",variable=v, value='SUM',command=self.aggregate1)
+        self.r1 =Radiobutton(win,text="SUM",variable=v, value='SUM',command=self.aggregate1,tristatevalue=0)
         self.r1.place(x=200,y=350)
-        self.r2 = Radiobutton(win, text='MIN',variable=v,value='MIN',command=self.aggregate2)
+        self.r2 = Radiobutton(win, text='MIN',variable=v,value='MIN',command=self.aggregate2,tristatevalue=0)
         self.r2.place(x=200, y=370)
-        self.r3 = Radiobutton(win, text='MAX',variable=v,value='MAX',command=self.aggregate3)
+        self.r3 = Radiobutton(win, text='MAX',variable=v,value='MAX',command=self.aggregate3,tristatevalue=0)
         self.r3.place(x=200, y=390)
-        self.r4 = Radiobutton(win, text='NULL',variable=v,value='NULL',command=self.aggregate4)
+        self.r4 = Radiobutton(win, text='NULL',variable=v,value='NULL',command=self.aggregate4,tristatevalue=0)
         self.r4.place(x=200, y=410)
-        self.r5 = Radiobutton(win, text='NOT NULL',variable=v,value='NOT NULL',command=self.aggregate5)
+        self.r5 = Radiobutton(win, text='NOT NULL',variable=v,value='NOT NULL',command=self.aggregate5,tristatevalue=0)
         self.r5.place(x=200, y=430)
-        self.r6 = Radiobutton(win, text='COUNT',variable=v,value='COUNT',command=self.aggregate6)
+        self.r6 = Radiobutton(win, text='COUNT',variable=v,value='COUNT',command=self.aggregate6,tristatevalue=0)
         self.r6.place(x=200, y=450)
         self.lbl6 = Label(win, text='OUTPUT :')
         self.lbl6.place(x=50, y=480)
         self.t4 = Entry(win, width=20)
         self.t4.place(x=120, y=480)
+        self.f1 = LabelFrame(win, text='File Data')
+        self.f1.pack(fill=BOTH, expand=1)
+        self.f1.place(x=30, y=130, height=150, width=600)
+        self.f2 = LabelFrame(win, text='Spliting A File')
+        self.f2.pack(fill=BOTH, expand=1)
+        self.f2.place(x=350, y=350, height=150, width=250)
+        self.lbl7 = Label(self.f2, text='Split Percentage(%) :')
+        self.lbl7.place(relx=0.05,rely=0.1)
+        cn1=self.cb2 = Combobox(self.f2, width=10, state="readonly")
+        self.cb2.place(relx=0.6,rely=0.1)
+        cn1['values'] = (50,25)
+        self.b2 = Button(self.f2, text='Result',command=self.download)
+        self.b2.place(relx=0.4, rely=0.4)
 
 
 
@@ -55,7 +68,7 @@ class app :
             self.t4.delete(0, END)
             self.t4.insert(END, str(sum))
         else:
-            showinfo(title='Error message', message="Upload a file first!")
+            showwarning(title='Error message', message="Upload a file first!")
 
     def aggregate2(self):
         temp = self.t1.get()
@@ -65,7 +78,7 @@ class app :
             self.t4.delete(0,END)
             self.t4.insert(END, str(min))
         else:
-            showinfo(title='Error message', message="Upload a file first!")
+            showwarning(title='Error message', message="Upload a file first!")
 
     def aggregate3(self):
         temp = self.t1.get()
@@ -76,7 +89,7 @@ class app :
             self.t4.insert(END, str(max))
 
         else:
-            showinfo(title='Error message', message="Upload a file first!")
+            showwarning(title='Error message', message="Upload a file first!")
 
     def aggregate4(self):
         temp = self.t1.get()
@@ -87,7 +100,7 @@ class app :
             self.t4.insert(END, str(null))
 
         else:
-            showinfo(title='Error message', message="Upload a file first!")
+            showwarning(title='Error message', message="Upload a file first!")
 
     def aggregate5(self):
         temp = self.t1.get()
@@ -97,7 +110,7 @@ class app :
             self.t4.delete(0, END)
             self.t4.insert(END, str(nnull))
         else:
-            showinfo(title='Error message', message="Upload a file first!")
+            showwarning(title='Error message', message="Upload a file first!")
 
     def aggregate6(self):
         temp = self.t1.get()
@@ -107,11 +120,11 @@ class app :
             self.t4.delete(0, END)
             self.t4.insert(END, str(count))
         else:
-            showinfo(title='Error message', message="Upload a file first!")
+            showwarning(title='Error message', message="Upload a file first!")
 
 
     def browse(self):
-        global filename, headers
+        global filename, headers,rowcount
         filename = filedialog.askopenfilename(initialdir = "/",title = "Select a File",filetypes = (("csv files","*.csv*"),("all files","*.*")))
         showinfo(title='Select a File', message="File Uploaded !")
         self.t1.delete(0,END)
@@ -126,23 +139,32 @@ class app :
         self.t3.insert(END, str(colcount))
 
         df1 = pd.read_csv(filename)
-        self.f1 = Frame(win, height=100, width=100)
-        self.f1.pack(fill=BOTH, expand=1)
-        self.f1.place(x=10, y=150)
-        self.table = Table(self.f1, width=370, height=100, dataframe=df1, read_only=True)
+        self.table = Table(self.f1, dataframe=df1, read_only=True)
         self.table.show()
 
-        cn = self.cb1 = Combobox(win, width=15)
+        cn = self.cb1 = Combobox(win, width=15,state="readonly")
         self.cb1.place(x=150, y=300)
         with open(filename,'r') as f:
             d_reader = csv.DictReader(f)
             headers = d_reader.fieldnames
         cn['values'] = headers
 
+    def download(self):
+        input_percent = self.cb2.get()
+        data = pd.read_csv(filename)
+        size = int(float(rowcount) * float(float(input_percent) / 100))
+        n = int(100 / int(input_percent))
+        for i in range(n):
+            df = data[size * i:size * (i + 1)]
+            df.to_csv(f'SplitFile_{i + 1}.csv', index=False)
+        showinfo(title='Splited', message="File Splited Succuessfully !")
+        self.msg = Label(self.f2,text="File Splited Succuessfully..!")
+        self.msg.place(relx=0.2, rely=0.7)
+
 
 if __name__ == "__main__":
     win=Tk()
     App = app(win)
     win.title('GUI Python')
-    win.geometry("500x600")
+    win.geometry("700x600")
     win.mainloop()
